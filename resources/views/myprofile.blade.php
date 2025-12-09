@@ -51,10 +51,18 @@
                 </p>
             </div>
 
-            <!-- Edit Button -->
-            <button type="button" style="background: white; color: #7C5CEE; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                <i class="fas fa-edit"></i> Edit Profile
-            </button>
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 12px;">
+                <button type="button" style="background: white; color: #7C5CEE; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+                <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Are you sure you want to logout?')" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

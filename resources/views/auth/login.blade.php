@@ -49,7 +49,7 @@
                 <div style="margin-bottom: 20px;">
                     <label style="font-weight: 600; color: #333; font-size: 0.85rem; display: block; margin-bottom: 6px;">Password</label>
                     <input type="password" name="password" id="password" placeholder="Enter your password" class="form-control @error('password') is-invalid @enderror" 
-                        required style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fafbfc;">
+                        required autocomplete="current-password" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fafbfc;">
                     @error('password')
                         <small style="color: #d32f2f; font-size: 0.8rem;">{{ $message }}</small>
                     @enderror

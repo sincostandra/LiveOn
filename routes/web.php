@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages/group/{post}', [MessageController::class, 'viewGroupChat'])->name('messages.group');
     Route::post('/messages/group/{post}/send', [MessageController::class, 'sendGroupMessage'])->name('messages.group.send');
     Route::get('/messages/direct/{user}', [MessageController::class, 'directMessage'])->name('messages.direct');
+    Route::post('/messages/direct/{user}/send', [MessageController::class, 'sendDirectMessage'])->name('messages.direct.send');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');

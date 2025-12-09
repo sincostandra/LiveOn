@@ -14,20 +14,37 @@ class DiscoverController extends Controller
     {
         $query = Post::with('user', 'requests');
 
-        if ($request->filled('date')) {
-            $query->whereDate('concert_date', '=', $request->date);
+        // Date filter
+        if ($request->filled('date_filter')) {
+            $dateFilter = $request->date_filter;
+            $now = now();
+            
+            switch ($dateFilter) {
+                case 'today':
+                    $query->whereDate('concert_date', $now->toDateString());
+                    break;
+                case 'this_week':
+                    // From today until end of this week (Sunday)
+                    $startOfWeek = $now->copy()->startOfDay();
+                    $endOfWeek = $now->copy()->endOfWeek()->endOfDay();
+                    $query->whereBetween('concert_date', [$startOfWeek, $endOfWeek]);
+                    break;
+                case 'this_month':
+                    $query->whereMonth('concert_date', $now->month)
+                          ->whereYear('concert_date', $now->year);
+                    break;
+            }
         }
 
-        if ($request->filled('city')) {
-            $query->where('city', 'like', '%' . $request->city . '%');
-        }
-
-        if ($request->filled('country')) {
-            $query->where('country', 'like', '%' . $request->country . '%');
-        }
-
-        if ($request->filled('genre')) {
-            $query->where('genre', 'like', '%' . $request->genre . '%');
+        // Location filter (search in both city and location fields)
+        if ($request->filled('location_filter')) {
+            $location = trim($request->location_filter);
+            if (!empty($location)) {
+                $query->where(function($q) use ($location) {
+                    $q->where('city', 'like', '%' . $location . '%')
+                      ->orWhere('location', 'like', '%' . $location . '%');
+                });
+            }
         }
 
         if ($request->filled('search')) {

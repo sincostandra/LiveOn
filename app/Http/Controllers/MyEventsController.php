@@ -34,20 +34,33 @@ class MyEventsController extends Controller
     public function acceptRequest(PostRequest $request)
     {
         $post = $request->post;
-        $this->authorize('update', $post);
+        
+        // Check if current user is the post owner
+        if ($post->user_id !== Auth::id()) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        // Check if there are still spots available
+        if ($post->spotsLeftCount() <= 0) {
+            return back()->with('error', 'No spots available.');
+        }
 
         $request->update(['status' => 'accepted']);
 
-        return back()->with('success', 'Request accepted!');
+        return back()->with('success', 'Request accepted! ' . $request->user->first_name . ' has been added to your group.');
     }
 
     public function rejectRequest(PostRequest $request)
     {
         $post = $request->post;
-        $this->authorize('update', $post);
+        
+        // Check if current user is the post owner
+        if ($post->user_id !== Auth::id()) {
+            return back()->with('error', 'Unauthorized action.');
+        }
 
         $request->update(['status' => 'rejected']);
 
-        return back()->with('success', 'Request rejected!');
+        return back()->with('success', $request->user->first_name . ' ' . $request->user->last_name . ' has been rejected and removed from the request list.');
     }
 }

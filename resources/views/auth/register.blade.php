@@ -57,11 +57,16 @@
 
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-weight: 600; color: #333; margin-bottom: 6px; font-size: 0.85rem;">Password</label>
-                    <input type="password" name="password" id="password" placeholder="Enter your password" class="form-control @error('password') is-invalid @enderror" required style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fafbfc;">
+                    <input type="password" name="password" id="password" placeholder="Enter your password" class="form-control @error('password') is-invalid @enderror" required autocomplete="new-password" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fafbfc;">
                     <small style="color: #999; display: block; margin-top: 4px; font-size: 0.8rem;">Minimum 8 characters</small>
                     @error('password')
                         <small style="color: #d32f2f; font-size: 0.8rem;">{{ $message }}</small>
                     @enderror
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; color: #333; margin-bottom: 6px; font-size: 0.85rem;">Confirm Password</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm your password" class="form-control" required autocomplete="new-password" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fafbfc;">
                 </div>
 
                 <div style="margin-bottom: 16px;">

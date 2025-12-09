@@ -63,26 +63,27 @@
                 <div style="background: white; padding: 18px; border-radius: 12px; position: sticky; top: 80px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
                     <h5 style="font-weight: 700; margin-bottom: 16px; color: #1a1a1a; font-size: 0.95rem;">Filters</h5>
                     
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.85rem;">Date</label>
-                        <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; color: #666; background: #fafbfc;">
-                            <option>Any date</option>
-                            <option>Today</option>
-                            <option>Tomorrow</option>
-                            <option>This Week</option>
-                            <option>This Month</option>
-                        </select>
-                    </div>
+                    <form id="filterForm" method="GET" action="{{ route('discover') }}">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.85rem;">Date</label>
+                            <select name="date_filter" id="dateFilter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; color: #666; background: #fafbfc;" onchange="this.form.submit()">
+                                <option value="">Any date</option>
+                                <option value="today" {{ request('date_filter') == 'today' ? 'selected' : '' }}>Today</option>
+                                <option value="this_week" {{ request('date_filter') == 'this_week' ? 'selected' : '' }}>This Week</option>
+                                <option value="this_month" {{ request('date_filter') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                            </select>
+                        </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.85rem;">Location</label>
-                        <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; color: #666; background: #fafbfc;">
-                            <option>All locations</option>
-                            <option>Jakarta</option>
-                            <option>Surabaya</option>
-                            <option>Bandung</option>
-                        </select>
-                    </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.85rem;">Location</label>
+                            <input type="text" name="location_filter" id="locationFilter" value="{{ request('location_filter') }}" placeholder="Search by city or venue" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; color: #666; background: #fafbfc;" oninput="debounceSubmit()">
+                            @if(request('location_filter'))
+                                <button type="button" onclick="document.getElementById('locationFilter').value=''; document.getElementById('filterForm').submit();" style="margin-top: 6px; padding: 4px 10px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem; color: #666; cursor: pointer;">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            @endif
+                        </div>
+                    </form>
 
 
                 </div>
@@ -117,14 +118,22 @@
                 <!-- Concert Posts -->
                 @forelse ($posts as $post)
                     <div style="background: white; border-radius: 10px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <!-- Colored Header -->
-                        <div style="background: linear-gradient(135deg, #7C5CEE, #FF6B9D); padding: 15px; color: white; display: flex; align-items: center; gap: 15px;">
+                        <!-- Colored Header with Cover Image -->
+                        @php
+                            $headerBackground = 'linear-gradient(135deg, #7C5CEE, #FF6B9D)';
+                            if ($post->cover_image) {
+                                $headerBackground = 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(' . asset('storage/' . $post->cover_image) . ')';
+                            } elseif ($post->cover_color) {
+                                $headerBackground = $post->cover_color;
+                            }
+                        @endphp
+                        <div style="background: {{ $headerBackground }}; background-size: cover; background-position: center; padding: 15px; color: white; display: flex; align-items: center; gap: 15px; min-height: 100px;">
                             <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-music" style="font-size: 1.5rem;"></i>
                             </div>
                             <div>
-                                <h5 style="margin: 0 0 5px 0; font-weight: 700;">{{ $post->concert_name }}</h5>
-                                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">{{ $post->location }} • {{ $post->concert_date->format('M d, Y') }}</p>
+                                <h5 style="margin: 0 0 5px 0; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ $post->concert_name }}</h5>
+                                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ $post->location }} • {{ $post->concert_date->format('M d, Y') }}</p>
                             </div>
                         </div>
 
@@ -133,10 +142,6 @@
                             <div style="display: flex; gap: 20px;">
                                 <!-- Left - Info -->
                                 <div style="flex: 1;">
-                                    @if ($post->cover_image)
-                                        <img src="{{ asset('storage/' . $post->cover_image) }}" alt="{{ $post->concert_name }}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                                    @endif
-
                                     <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">{{ Str::limit($post->description, 200) }}</p>
 
                                     <div style="display: flex; align-items: center; gap: 20px; font-size: 0.9rem; color: #999;">
@@ -364,6 +369,15 @@ document.getElementById('cover_image').addEventListener('change', function() {
         reader.readAsDataURL(this.files[0]);
     }
 });
+
+// Debounce function for location filter
+let debounceTimer;
+function debounceSubmit() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+        document.getElementById('filterForm').submit();
+    }, 500);
+}
 </script>
 
 @endsection

@@ -94,29 +94,31 @@
 
                         <!-- Message Bubble with Info -->
                         <div>
-                            <!-- Name and Time -->
+                            <!-- Name and Time (always show for first message or different sender) -->
                             @if (!isset($previousSender) || $previousSender !== $message->sender_id)
                                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                     <span style="font-weight: 600; color: #1a1a1a; font-size: 0.8rem;">{{ $message->sender->first_name }} {{ $message->sender->last_name }}</span>
-                                    <span style="color: #999; font-size: 0.75rem;">
-                                        @php
-                                            $time = $message->created_at->format('H:i');
-                                        @endphp
-                                        {{ $time }}
-                                    </span>
+                                    <span style="color: #999; font-size: 0.75rem;">{{ $message->created_at->format('H:i') }}</span>
                                 </div>
                             @endif
 
                             <!-- Message Content -->
-                            @if ($message->image_path)
-                                <img src="{{ asset('storage/' . $message->image_path) }}" alt="Image" style="max-width: 200px; border-radius: 10px; margin-bottom: 6px;">
-                            @endif
-                            
-                            @if ($message->message)
-                                <div style="background: {{ $isOwn ? 'linear-gradient(135deg, #7C5CEE, #9D4EDD)' : '#ffffff' }}; color: {{ $isOwn ? '#ffffff' : '#1a1a1a' }}; padding: 10px 14px; border-radius: 10px; word-break: break-word; box-shadow: 0 2px 4px rgba(0,0,0,0.08); font-size: 0.9rem;">
-                                    {{ $message->message }}
-                                </div>
-                            @endif
+                            <div>
+                                @if ($message->image_path)
+                                    <img src="{{ asset('storage/' . $message->image_path) }}" alt="Image" style="max-width: 300px; max-height: 300px; border-radius: 10px; margin-bottom: 6px; display: block; object-fit: cover;">
+                                @endif
+                                
+                                @if ($message->message)
+                                    <div style="background: {{ $isOwn ? 'linear-gradient(135deg, #7C5CEE, #9D4EDD)' : '#ffffff' }}; color: {{ $isOwn ? '#ffffff' : '#1a1a1a' }}; padding: 10px 14px; border-radius: 10px; word-break: break-word; box-shadow: 0 2px 4px rgba(0,0,0,0.08); font-size: 0.9rem; {{ $message->image_path ? 'margin-top: 6px;' : '' }}">
+                                        {{ $message->message }}
+                                    </div>
+                                @endif
+                                
+                                <!-- Always show timestamp for this specific message -->
+                                <span style="color: #999; font-size: 0.7rem; display: block; margin-top: 4px; {{ $isOwn ? 'text-align: right;' : '' }}">
+                                    {{ $message->created_at->format('H:i') }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,20 +139,72 @@
         </div>
 
         <!-- Message Input -->
-        <form action="{{ route('messages.group.send', $post) }}" method="POST" enctype="multipart/form-data" style="background: white; padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: flex-end;">
+        <form id="messageForm{{ $post->id }}" action="{{ route('messages.group.send', $post) }}" method="POST" enctype="multipart/form-data" style="background: white; padding: 12px 16px; border-top: 1px solid #eee;">
             @csrf
-            <button type="button" onclick="document.getElementById('imageInput{{ $post->id }}').click();" style="width: 36px; height: 36px; background: white; border: 1px solid #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7C5CEE; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#f5f5f5';" onmouseout="this.style.backgroundColor='white';">
-                <i class="fas fa-image" style="font-size: 1rem;"></i>
-            </button>
-            <input type="file" name="image" id="imageInput{{ $post->id }}" accept="image/*" style="display: none;">
+            <!-- Image Preview -->
+            <div id="imagePreviewContainer{{ $post->id }}" style="display: none; padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; position: relative;">
+                <img id="imagePreview{{ $post->id }}" src="" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 8px; display: block;">
+                <button type="button" onclick="clearImagePreview{{ $post->id }}()" style="position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times" style="font-size: 0.8rem;"></i>
+                </button>
+            </div>
             
-            <input type="text" name="message" placeholder="Type a message..." style="flex: 1; padding: 9px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.9rem; outline: none; transition: all 0.2s ease;" onfocus="this.style.borderColor='#7C5CEE';" onblur="this.style.borderColor='#ddd';">
-            
-            <button type="submit" style="width: 36px; height: 36px; background: linear-gradient(135deg, #7C5CEE, #9D4EDD); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
-                <i class="fas fa-paper-plane" style="font-size: 0.95rem;"></i>
-            </button>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <button type="button" onclick="document.getElementById('imageInput{{ $post->id }}').click();" style="width: 36px; height: 36px; background: white; border: 1px solid #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7C5CEE; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#f5f5f5';" onmouseout="this.style.backgroundColor='white';">
+                    <i class="fas fa-image" style="font-size: 1rem;"></i>
+                </button>
+                <input type="file" name="image" id="imageInput{{ $post->id }}" accept="image/*" style="display: none;" onchange="handleImageSelect{{ $post->id }}(this)">
+                
+                <input type="text" name="message" id="messageInput{{ $post->id }}" placeholder="Type a message..." style="flex: 1; padding: 9px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.9rem; outline: none; transition: all 0.2s ease;" onfocus="this.style.borderColor='#7C5CEE';" onblur="this.style.borderColor='#ddd';">
+                
+                <button type="submit" style="width: 36px; height: 36px; background: linear-gradient(135deg, #7C5CEE, #9D4EDD); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                    <i class="fas fa-paper-plane" style="font-size: 0.95rem;"></i>
+                </button>
+            </div>
         </form>
     </div>
 </div>
+
+<script>
+// Handle image selection and preview for post {{ $post->id }}
+function handleImageSelect{{ $post->id }}(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('imagePreview{{ $post->id }}').src = e.target.result;
+            document.getElementById('imagePreviewContainer{{ $post->id }}').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Clear image preview
+function clearImagePreview{{ $post->id }}() {
+    document.getElementById('imageInput{{ $post->id }}').value = '';
+    document.getElementById('imagePreviewContainer{{ $post->id }}').style.display = 'none';
+    document.getElementById('imagePreview{{ $post->id }}').src = '';
+}
+
+// Form validation
+document.getElementById('messageForm{{ $post->id }}').addEventListener('submit', function(e) {
+    const messageInput = document.getElementById('messageInput{{ $post->id }}');
+    const imageInput = document.getElementById('imageInput{{ $post->id }}');
+    
+    // Check if both message and image are empty
+    if (!messageInput.value.trim() && !imageInput.files.length) {
+        e.preventDefault();
+        alert('Please enter a message or select an image.');
+        return false;
+    }
+});
+
+// Auto-scroll to bottom on page load
+window.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.querySelector('[style*="flex: 1; overflow-y: auto"]');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+});
+</script>
 
 @endsection

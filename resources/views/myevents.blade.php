@@ -5,6 +5,21 @@
 @section('content')
 
 <div style="display: grid; grid-template-columns: 250px 1fr; gap: 28px; padding: 32px 30px; max-width: 1400px; margin: 0 auto; background: #fafbfc; min-height: 100vh; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">
+    
+    @if (session('success'))
+        <div style="grid-column: 1 / -1; background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-check-circle" style="font-size: 1.2rem;"></i>
+            <span style="font-weight: 500;">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div style="grid-column: 1 / -1; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-exclamation-circle" style="font-size: 1.2rem;"></i>
+            <span style="font-weight: 500;">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Left Sidebar - Summary -->
     <div>
         <h3 style="font-weight: 700; color: #1a1a1a; margin-bottom: 20px; font-size: 0.95rem;">Summary</h3>
